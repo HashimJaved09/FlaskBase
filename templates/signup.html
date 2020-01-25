@@ -1,15 +1,42 @@
 {% extends 'base.html' %}
 
-{% block header %}
-  <h1>{% block title %}Register{% endblock %}</h1>
+{% block content %}
+    <form action={{ url_for('do_admin_signup') }} method="POST">
+        <div class="login">
+            <div class="login-screen">
+                <div class="app-title">
+                    <h1>Signup</h1>
+                </div>
+                <div class="login-form">
+                    <div class="control-group">
+                        <input type="text" class="login-field" value="" placeholder="username" name="username" required>
+                        <label class="login-field-icon fui-user" for="login-name"></label>
+                    </div>
+                    <div class="control-group">
+                        <input type="password" class="login-field" value="" placeholder="password" name="password" required>
+                        <label class="login-field-icon fui-lock" for="login-pass"></label>
+                    </div>
+                    <input type="submit" value="Sign Up" class="btn btn-primary btn-large btn-block">
+                    <br>
+                    <span class="text-danger">{{ msg }}</span>
+                </div>
+            </div>
+        </div>
+    </form>
 {% endblock %}
 
-{% block content %}
-  <form method="post">
-    <label for="username">Username</label>
-    <input name="username" id="username" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <input type="submit" value="Register">
-  </form>
-{% endblock %}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block header %}#}
+{#  <h1>{% block title %}Register{% endblock %}</h1>#}
+{#{% endblock %}#}
+{##}
+{#{% block content %}#}
+{#  <form method="post">#}
+{#    <label for="username">Username</label>#}
+{#    <input name="username" id="username" required>#}
+{#    <label for="password">Password</label>#}
+{#    <input type="password" name="password" id="password" required>#}
+{#    <input type="submit" value="Register">#}
+{#  </form>#}
+{#{% endblock %}#}
