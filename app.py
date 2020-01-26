@@ -1,4 +1,5 @@
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -18,6 +19,12 @@ class User(db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
@@ -28,7 +35,7 @@ def home():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=session.get('user', None))
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -36,13 +43,21 @@ def do_admin_login():
     if request.method == 'POST':
         POST_USERNAME = str(request.form['username'])
         POST_PASSWORD = str(request.form['password'])
-        query = db.session.query(User).filter_by(username=POST_USERNAME,password=POST_PASSWORD)
-        result = query.first()
-        if result:
-            session['logged_in'] = True
-        else:
+
+        user = db.session.query(User).filter_by(username=POST_USERNAME).first()
+
+        if not user or not check_password_hash(user.password, POST_PASSWORD):
+            flash('Please check your login details and try again.')
             flash('wrong password!')
-        return home()
+            return redirect(url_for('do_admin_login'))
+
+        # if user:
+        session['logged_in'] = True
+        session['user'] = user.username
+
+        # else:
+        #     flash('wrong password!')
+        return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 
@@ -57,7 +72,7 @@ def do_admin_signup():
             msg = 'Username already exists!'
             return render_template('signup.html', msg=msg)
         else:
-            user = User(username=POST_USERNAME, password=POST_PASSWORD)
+            user = User(username=POST_USERNAME, password=generate_password_hash(POST_PASSWORD, method='sha256'))
             db.session.add(user)
             db.session.commit()
 
